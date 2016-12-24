@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {{post.render() | safe}}
+  <br>
+  <form method="post">
+    <textarea name="comment" style="height: 100px; width: 400px;"></textarea>
+    <br>
+    <input type="submit" value="Leave comment">
+  </form>
+
+  <h3>Comments</h3>
+  {% for comment in post.comments %}
+    <p>{{comment | safe}}</p>
+  {% endfor %}
+
+{% endblock %}

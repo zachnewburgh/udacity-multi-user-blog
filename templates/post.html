@@ -1,0 +1,44 @@
+<div class="post">
+  <div class="post-heading">
+    <div class="post-title">
+      {{p.subject}}
+
+      <!-- edit -->
+      (<a href="/blog/editpost/{{p.key().id()}}">edit</a> |
+      <!-- delete -->
+      <a href="/blog/deletepost/{{p.key().id()}}">delete</a>)
+    </div>
+
+    <div class="post-date">
+      {{p.created.strftime("%b %d, %Y")}}
+    </div>
+  </div>
+
+  <div class="post-content">
+    {{p._render_text | safe}}
+  </div>
+
+  <div class="post-attributes">
+    <br>
+    {{p.likes|length}} 
+
+    {% if p.likes|length == 1 %}
+      like
+    {% else %}
+      likes
+    {% endif %}
+
+    |
+
+    <a href="/blog/{{p.key().id()}}">
+      {{p.comments|length}}
+
+      {% if p.comments|length == 1 %}
+        comment
+      {% else %}
+        comments
+      {% endif %}
+    </a>
+  </div>
+
+</div>
