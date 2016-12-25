@@ -156,13 +156,13 @@ class BlogFront(BlogHandler):
         elif like == "like" and (user not in post.likes):
             post.likes.append(user)
             post.put()
-            self.redirect('/blog')
+            self.redirect('/')
         elif author in post.likes:
             post.likes.remove(user)
             post.put()
-            self.redirect('/blog')
+            self.redirect('/')
         else:
-            self.redirect('/blog')
+            self.redirect('/')
 
 class PostPage(BlogHandler):
     def get(self, post_id):
@@ -182,7 +182,7 @@ class PostPage(BlogHandler):
 
         post.comments.append(comment + "<br>by " + author)
         post.put()
-        self.redirect('/blog')
+        self.redirect('/')
 
 class NewPost(BlogHandler):
     def get(self):
@@ -193,7 +193,7 @@ class NewPost(BlogHandler):
 
     def post(self):
         if not self.user:
-            self.redirect('/blog')
+            self.redirect('/')
 
         author = self.request.get('author')
         subject = self.request.get('subject')
@@ -254,9 +254,9 @@ class DeletePost(BlogHandler):
         delete = self.request.get('delete')
         if delete == "Yes":
             p.delete()
-            self.redirect('/blog')
+            self.redirect('/')
         else:
-            self.redirect('/blog')
+            self.redirect('/')
 
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
@@ -349,7 +349,7 @@ class Unit3Welcome(BlogHandler):
         else:
             self.redirect('/register')
 
-app = webapp2.WSGIApplication([('/blog/?', BlogFront),
+app = webapp2.WSGIApplication([('/', BlogFront),
                                ('/blog/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPost),
                                ('/blog/editpost/([0-9]+)', EditPost),
