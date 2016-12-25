@@ -15,11 +15,17 @@ template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
                                autoescape = True)
 
+# Secret Code for Cookies
+
 secret = 'secretcodehere'
+
+# Template Rendering
 
 def render_str(template, **params):
     t = jinja_env.get_template(template)
     return t.render(params)
+
+# Cookie Settings
 
 def make_secure_val(val):
     return '%s|%s' % (val, hmac.new(secret, val).hexdigest())
@@ -28,6 +34,8 @@ def check_secure_val(secure_val):
     val = secure_val.split('|')[0]
     if secure_val == make_secure_val(val):
         return val
+
+# Basic Blog Functionality: template rendering and user authentication.
 
 class BlogHandler(webapp2.RequestHandler):
     def write(self, *a, **kw):
@@ -65,7 +73,8 @@ def render_post(response, post):
     response.out.write('<b>' + post.subject + '</b><br>')
     response.out.write(post.content)
 
-##### user stuff
+# Password Authentication
+
 def make_salt(length = 5):
     return ''.join(random.choice(letters) for x in xrange(length))
 
@@ -81,6 +90,8 @@ def valid_pw(name, password, h):
 
 def users_key(group = 'default'):
     return db.Key.from_path('users', group)
+
+# User Model
 
 class User(db.Model):
     name = db.StringProperty(required = True)
@@ -110,11 +121,12 @@ class User(db.Model):
         if u and valid_pw(name, pw, u.pw_hash):
             return u
 
-
-##### blog stuff
+# Blog Key
 
 def blog_key(name = 'default'):
     return db.Key.from_path('blogs', name)
+
+# Post Model
 
 class Post(db.Model):
     author = db.StringProperty(required = True)
@@ -132,6 +144,8 @@ class Post(db.Model):
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
         return render_str("post.html", p = self)
+
+# Blog's Homepage: displays posts and handles 'like' functionality for each post.
 
 class BlogFront(BlogHandler):
     def get(self):
@@ -164,6 +178,8 @@ class BlogFront(BlogHandler):
         else:
             self.redirect('/')
 
+# Post's Show Page: displays post and handles comment functionality for each post.
+
 class PostPage(BlogHandler):
     def get(self, post_id):
         key = db.Key.from_path('Post', int(post_id), parent=blog_key())
@@ -183,6 +199,8 @@ class PostPage(BlogHandler):
         post.comments.append(comment + "<br>by " + author)
         post.put()
         self.redirect('/')
+
+# Post Create Page: render form and create a post if the user is authenticated.
 
 class NewPost(BlogHandler):
     def get(self):
@@ -206,6 +224,8 @@ class NewPost(BlogHandler):
         else:
             error = "subject and content, please!"
             self.render("newpost.html", author=author, subject=subject, content=content, error=error)
+
+# Post's Edit Page: render form and edit post only if the post belongs to the user.
 
 class EditPost(BlogHandler):
     def get(self, post_id):
@@ -236,6 +256,8 @@ class EditPost(BlogHandler):
             error = "subject and content, please!"
             self.render("editpost.html", post = p, error=error)
 
+# Post's Delete Page: render a form to confirm the deletion of a post only if the post belongs to the user.
+
 class DeletePost(BlogHandler):
     def get(self, post_id):
         key = db.Key.from_path('Post', int(post_id), parent=blog_key())
@@ -258,6 +280,8 @@ class DeletePost(BlogHandler):
         else:
             self.redirect('/')
 
+# Signup Authentication Helper Functions
+
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
     return username and USER_RE.match(username)
@@ -269,6 +293,8 @@ def valid_password(password):
 EMAIL_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
 def valid_email(email):
     return not email or EMAIL_RE.match(email)
+
+# User Signup Page
 
 class Signup(BlogHandler):
     def get(self):
@@ -307,6 +333,8 @@ class Signup(BlogHandler):
     def done(self, *a, **kw):
         raise NotImplementedError
 
+# Allow user registration if user does not already exist.
+
 class Register(Signup):
     def done(self):
         #make sure the user doesn't already exist
@@ -320,6 +348,8 @@ class Register(Signup):
 
             self.login(u)
             self.redirect('/welcome')
+
+# User Login Page
 
 class Login(BlogHandler):
     def get(self):
@@ -337,10 +367,14 @@ class Login(BlogHandler):
             msg = 'Invalid login'
             self.render('login-form.html', error = msg)
 
+# User Logout
+
 class Logout(BlogHandler):
     def get(self):
         self.logout()
         self.redirect('/signup')
+
+# Welcome Page
 
 class Welcome(BlogHandler):
     def get(self):
