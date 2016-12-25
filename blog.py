@@ -202,7 +202,7 @@ class NewPost(BlogHandler):
         if author and subject and content:
             p = Post(parent = blog_key(), author = author, subject = subject, content = content)
             p.put()
-            self.redirect('/blog/%s' % str(p.key().id()))
+            self.redirect('/posts/%s' % str(p.key().id()))
         else:
             error = "subject and content, please!"
             self.render("newpost.html", author=author, subject=subject, content=content, error=error)
@@ -231,7 +231,7 @@ class EditPost(BlogHandler):
             p.subject = subject
             p.content = content
             p.put()
-            self.redirect('/blog/%s' % str(p.key().id()))
+            self.redirect('/posts/%s' % str(p.key().id()))
         else:
             error = "subject and content, please!"
             self.render("editpost.html", post = p, error=error)
@@ -350,9 +350,9 @@ class Welcome(BlogHandler):
             self.redirect('/register')
 
 app = webapp2.WSGIApplication([('/', BlogFront),
-                               ('/blog/([0-9]+)', PostPage),
+                               ('/posts/([0-9]+)', PostPage),
                                ('/posts/new', NewPost),
-                               ('/blog/editpost/([0-9]+)', EditPost),
+                               ('/posts/edit/([0-9]+)', EditPost),
                                ('/blog/deletepost/([0-9]+)', DeletePost),
                                ('/signup', Register),
                                ('/login', Login),
