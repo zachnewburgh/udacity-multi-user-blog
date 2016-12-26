@@ -133,7 +133,6 @@ class Post(db.Model):
     subject = db.StringProperty(required = True)
     content = db.TextProperty(required = True)
     likes = db.ListProperty(str, indexed = False, default = [])
-    # comments = db.ListProperty(str, indexed = False, default = [])
     created = db.DateTimeProperty(auto_now_add = True)
     last_modified = db.DateTimeProperty(auto_now = True)
 
@@ -241,7 +240,7 @@ class NewPost(BlogHandler):
 
     def post(self):
         if not self.user:
-            self.redirect('/')
+            return self.redirect('/')
 
         author = self.request.get('author')
         subject = self.request.get('subject')
