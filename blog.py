@@ -240,7 +240,7 @@ class NewPost(BlogHandler):
 
     def post(self):
         if not self.user:
-            return self.redirect('/')
+            return self.redirect('/login')
 
         author = self.request.get('author')
         subject = self.request.get('subject')
