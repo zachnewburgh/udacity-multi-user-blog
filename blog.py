@@ -178,8 +178,6 @@ class BlogFront(BlogHandler):
     def get(self):
         if self.user:
             posts = Post.all().order('-created')
-            for p in posts:
-                p.delete()
             self.render('front.html', posts=posts)
         else:
             self.redirect('/login')
