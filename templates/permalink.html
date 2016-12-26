@@ -15,8 +15,8 @@
     <p>
       "{{comment.content | safe}}" by {{comment.author.name}}
       {% if user.name == comment.author.name %}
-        <br>  <a href="/posts/{{post.key().id()}}/comments/edit/{{comment.key().id()}}">edit</a> | 
-              <a href="/posts/{{post.key().id()}}/comments/delete/{{comment.key().id()}}">delete</a>
+        <br>  <a href="/comments/edit/{{comment.key().id()}}">edit</a> | 
+              <a href="/comments/delete/{{comment.key().id()}}">delete</a>
       {% endif %}
     </p>
   {% endfor %}

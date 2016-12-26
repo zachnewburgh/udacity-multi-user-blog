@@ -221,7 +221,7 @@ class PostPage(BlogHandler):
         c = Comment(parent = blog_key(), content = content, post = post, author = author)
         c.put()
         self.redirect('/')
-        
+
         # if author and content:
         #     c = Comment(parent = blog_key(), content = content, post = post, author = author)
         #     c.put()
@@ -309,6 +309,60 @@ class DeletePost(BlogHandler):
             self.redirect('/')
         else:
             self.redirect('/')
+
+# Comment's Edit Page: render form and edit post only if the post belongs to the user.
+
+class EditComment(BlogHandler):
+    def get(self, comment_id):
+        key = db.Key.from_path('Comment', int(comment_id), parent=blog_key())
+        comment = db.get(key)
+
+        if self.user.name == comment.author.name:
+            self.render("editcomment.html", comment = comment)
+        else:
+            posts = Post.all().order('-created')
+            error = "You can only edit your own comments!"
+            self.render('front.html', posts = posts, error = error)
+
+    def post(self, comment_id):
+        key = db.Key.from_path('Comment', int(comment_id), parent=blog_key())
+        c = db.get(key)
+
+        content = self.request.get('content')
+
+        if content:
+            c.content = content
+            c.put()
+            self.redirect('/posts/%s' % str(c.post.key().id()))
+        else:
+            error = "content, please!"
+            self.render("editcomment.html", comment = c, error=error)
+
+# Comment's Delete Page: render a form to confirm the deletion of a post only if the post belongs to the user.
+
+class DeleteComment(BlogHandler):
+    def get(self, comment_id):
+        key = db.Key.from_path('Comment', int(comment_id), parent=blog_key())
+        comment = db.get(key)
+
+        if self.user.name == comment.author.name:
+            self.render("deletecomment.html", comment = comment)
+        else:
+            posts = Post.all().order('-created')
+            error = "You can only delete your own comments!"
+            self.render('front.html', posts = posts, error = error)
+
+    def post(self, comment_id):
+        key = db.Key.from_path('Comment', int(comment_id), parent=blog_key())
+        c = db.get(key)
+        post = c.post
+
+        delete = self.request.get('delete')
+        if delete == "Yes":
+            c.delete()
+            self.redirect('/posts/%s' % str(post.key().id()))
+        else:
+            self.redirect('/posts/%s' % str(post.key().id()))
 
 # Signup Authentication Helper Functions
 
@@ -418,6 +472,8 @@ app = webapp2.WSGIApplication([('/', BlogFront),
                                ('/posts/new', NewPost),
                                ('/posts/edit/([0-9]+)', EditPost),
                                ('/posts/delete/([0-9]+)', DeletePost),
+                               ('/comments/edit/([0-9]+)', EditComment),
+                               ('/comments/delete/([0-9]+)', DeleteComment),
                                ('/signup', Register),
                                ('/login', Login),
                                ('/logout', Logout),
