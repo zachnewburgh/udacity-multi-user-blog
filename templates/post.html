@@ -30,14 +30,8 @@
 
     |
 
-    <a href="/blog/{{p.key().id()}}">
-      {{p.comments|length}}
-
-      {% if p.comments|length == 1 %}
-        comment
-      {% else %}
-        comments
-      {% endif %}
+    <a href="/posts/{{p.key().id()}}">
+      comments
     </a>
   </div>
 

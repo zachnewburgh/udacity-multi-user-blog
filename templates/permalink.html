@@ -4,14 +4,21 @@
   {{post.render() | safe}}
   <br>
   <form method="post">
-    <textarea name="comment" style="height: 100px; width: 400px;"></textarea>
+    <textarea name="content" style="height: 100px; width: 400px;"></textarea>
     <br>
     <input type="submit" value="Leave comment">
   </form>
 
   <h3>Comments</h3>
+
   {% for comment in post.comments %}
-    <p>{{comment | safe}}</p>
+    <p>
+      "{{comment.content | safe}}" by {{comment.author.name}}
+      {% if user.name == comment.author.name %}
+        <br>  <a href="/posts/{{post.key().id()}}/comments/edit/{{comment.key().id()}}">edit</a> | 
+              <a href="/posts/{{post.key().id()}}/comments/delete/{{comment.key().id()}}">delete</a>
+      {% endif %}
+    </p>
   {% endfor %}
 
 {% endblock %}

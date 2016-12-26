@@ -133,7 +133,7 @@ class Post(db.Model):
     subject = db.StringProperty(required = True)
     content = db.TextProperty(required = True)
     likes = db.ListProperty(str, indexed = False, default = [])
-    comments = db.ListProperty(str, indexed = False, default = [])
+    # comments = db.ListProperty(str, indexed = False, default = [])
     created = db.DateTimeProperty(auto_now_add = True)
     last_modified = db.DateTimeProperty(auto_now = True)
 
@@ -144,6 +144,19 @@ class Post(db.Model):
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
         return render_str("post.html", p = self)
+
+# Comment Model
+
+class Comment(db.Model):
+    content = db.TextProperty(required = True)
+    post = db.ReferenceProperty(Post, collection_name='comments')
+    author = db.ReferenceProperty(User, collection_name='comments')
+    created = db.DateTimeProperty(auto_now_add = True)
+    last_modified = db.DateTimeProperty(auto_now = True)
+
+    @classmethod
+    def by_id(cls, uid):
+        return cls.get_by_id(uid, parent = blog_key())
 
 # Blog's Homepage: displays posts and handles 'like' functionality for each post.
 
@@ -191,14 +204,31 @@ class PostPage(BlogHandler):
 
         self.render("permalink.html", post = post)
 
+    # def post(self, post_id):
+    #     post = Post.by_id(int(post_id))
+    #     author = self.user.name
+    #     comment = self.request.get('comment')
+
+    #     post.comments.append(comment + "<br>by " + author)
+    #     post.put()
+    #     self.redirect('/')
+
     def post(self, post_id):
         post = Post.by_id(int(post_id))
-        author = self.user.name
-        comment = self.request.get('comment')
+        author = self.user
+        content = self.request.get('content')
 
-        post.comments.append(comment + "<br>by " + author)
-        post.put()
+        c = Comment(parent = blog_key(), content = content, post = post, author = author)
+        c.put()
         self.redirect('/')
+        
+        # if author and content:
+        #     c = Comment(parent = blog_key(), content = content, post = post, author = author)
+        #     c.put()
+        #     self.redirect('/')
+        # else:
+        #     error = "subject and content, please!"
+        #     self.render("newpost.html", author=author, subject=subject, content=content, error=error)
 
 # Post Create Page: render form and create a post if the user is authenticated.
 
