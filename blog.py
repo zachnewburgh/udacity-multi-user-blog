@@ -197,13 +197,13 @@ class BlogFront(BlogHandler):
         elif like == "like" and (user not in post.likes):
             post.likes.append(user)
             post.put()
-            self.redirect('/posts')
+            self.redirect('/')
         elif author in post.likes:
             post.likes.remove(user)
             post.put()
-            self.redirect('/posts')
+            self.redirect('/')
         else:
-            self.redirect('/posts')
+            self.redirect('/')
 
 
 # Post's Show Page:
@@ -300,7 +300,7 @@ class EditPost(BlogHandler):
                 error = "subject and content, please!"
                 self.render("editpost.html", post=p, error=error)
         else:
-            self.redirect('/posts')
+            self.redirect('/')
 
 
 # Post's Delete Page:
@@ -326,11 +326,11 @@ class DeletePost(BlogHandler):
         if self.user.name == p.author:
             if delete == "Yes":
                 p.delete()
-                self.redirect('/posts')
+                self.redirect('/')
             else:
-                self.redirect('/posts')
+                self.redirect('/')
         else:
-            self.redirect('/posts')
+            self.redirect('/')
 
 
 # Comment's Edit Page:
@@ -514,7 +514,7 @@ class Welcome(BlogHandler):
             self.redirect('/register')
 
 
-app = webapp2.WSGIApplication([('/posts', BlogFront),
+app = webapp2.WSGIApplication([('/', BlogFront),
                                ('/posts/([0-9]+)', PostPage),
                                ('/posts/new', NewPost),
                                ('/posts/edit/([0-9]+)', EditPost),
