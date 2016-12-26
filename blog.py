@@ -219,7 +219,7 @@ class PostPage(BlogHandler):
 
         c = Comment(parent = blog_key(), content = content, post = post, author = author)
         c.put()
-        self.redirect('/')
+        self.redirect('/posts/%s' % str(post_id))
 
         # if author and content:
         #     c = Comment(parent = blog_key(), content = content, post = post, author = author)
@@ -276,14 +276,17 @@ class EditPost(BlogHandler):
         subject = self.request.get('subject')
         content = self.request.get('content')
 
-        if subject and content:
-            p.subject = subject
-            p.content = content
-            p.put()
-            self.redirect('/posts/%s' % str(p.key().id()))
+        if self.user.name == p.author:
+            if subject and content:
+                p.subject = subject
+                p.content = content
+                p.put()
+                self.redirect('/posts/%s' % str(p.key().id()))
+            else:
+                error = "subject and content, please!"
+                self.render("editpost.html", post = p, error=error)
         else:
-            error = "subject and content, please!"
-            self.render("editpost.html", post = p, error=error)
+            self.redirect('/')
 
 # Post's Delete Page: render a form to confirm the deletion of a post only if the post belongs to the user.
 
@@ -303,9 +306,12 @@ class DeletePost(BlogHandler):
         p = db.get(key)
 
         delete = self.request.get('delete')
-        if delete == "Yes":
-            p.delete()
-            self.redirect('/')
+        if self.user.name == p.author:
+            if delete == "Yes":
+                p.delete()
+                self.redirect('/')
+            else:
+                self.redirect('/')
         else:
             self.redirect('/')
 
@@ -328,14 +334,16 @@ class EditComment(BlogHandler):
         c = db.get(key)
 
         content = self.request.get('content')
-
-        if content:
-            c.content = content
-            c.put()
-            self.redirect('/posts/%s' % str(c.post.key().id()))
+        if self.user.name == c.author.name:
+            if content:
+                c.content = content
+                c.put()
+                self.redirect('/posts/%s' % str(c.post.key().id()))
+            else:
+                error = "content, please!"
+                self.render("editcomment.html", comment = c, error=error)
         else:
-            error = "content, please!"
-            self.render("editcomment.html", comment = c, error=error)
+            self.redirect('/posts/%s' % str(c.post.key().id()))
 
 # Comment's Delete Page: render a form to confirm the deletion of a post only if the post belongs to the user.
 
@@ -357,9 +365,12 @@ class DeleteComment(BlogHandler):
         post = c.post
 
         delete = self.request.get('delete')
-        if delete == "Yes":
-            c.delete()
-            self.redirect('/posts/%s' % str(post.key().id()))
+        if self.user.name == c.author.name:
+            if delete == "Yes":
+                c.delete()
+                self.redirect('/posts/%s' % str(post.key().id()))
+            else:
+                self.redirect('/posts/%s' % str(post.key().id()))
         else:
             self.redirect('/posts/%s' % str(post.key().id()))
 
@@ -420,7 +431,6 @@ class Signup(BlogHandler):
 
 class Register(Signup):
     def done(self):
-        #make sure the user doesn't already exist
         u = User.by_name(self.username)
         if u:
             msg = 'That user already exists.'
